@@ -1,0 +1,32 @@
+#!/bin/bash
+
+make clean
+
+./configure --enable-static --enable-shared=no
+
+for filename in $(find . -name "Makefile")
+do
+    sed -i 's/LD = \/usr\/bin\/ld -m elf_x86_64/LD = pnacl-ld/' $filename
+    sed -i 's/CC = gcc/CC = pnacl-clang/' $filename
+    sed -i 's/PTHREAD_CC = gcc/PTHREAD_CC = pnacl-clang/' $filename
+    sed -i 's/ac_ct_CC = gcc/ac_ct_CC = pnacl-clang/' $filename
+    sed -i 's/AR = ar/AR = pnacl-ar/' $filename
+    sed -i 's/ac_ct_AR = ar/ac_ct_AR = pnacl-ar/' $filename
+    sed -i 's/CPP = gcc -E/CPP = pnacl-clang/' $filename
+    sed -i 's/-mavx2//' $filename
+    sed -i 's/-msse2//' $filename
+    sed -i 's/-Wunused-but-set-variable/-Wunused-const-variable/' $filename
+    sed -i 's/STRIP = strip/STRIP = pnacl-strip/' $filename
+    sed -i 's/RANLIB = ranlib/RANLIB = pnacl-ranlib/' $filename
+done
+
+sed -i 's/#define WEBP_HAVE_SSE2 1/#undef WEBP_HAVE_SSE2/' src/webp/config.h
+sed -i 's/#define WEBP_HAVE_AVX2 1/#undef WEBP_HAVE_AVX2/' src/webp/config.h
+
+make
+cd `dirname $0`
+
+libtool --mode=install install -c src/libwebp.la $(pwd)
+cp libwebp.a ../libwebp.a
+
+pnacl-ranlib ../libwebp.a

@@ -1,0 +1,20 @@
+# Git ignore for C/C++ language
+# Compiled object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so*
+*.dylib
+
+# Compiled Statis libraries
+*.lai
+*.la
+*.a
+!libwebp.a
+
+# nacl file
+*.bc
+#edit back file
+*~
